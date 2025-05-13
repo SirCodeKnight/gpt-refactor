@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-Refactor Demo</title>
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --secondary-color: #f50057;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .logo span {
+            color: var(--secondary-color);
+        }
+        
+        main {
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .settings-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .code-editor {
+            min-height: 400px;
+            position: relative;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 350px;
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-family: 'Consolas', 'Courier New', monospace;
+            resize: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0.25rem;
+        }
+        
+        button.secondary {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+        }
+        
+        select {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+        
+        .suggestions-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .suggestions-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .diff-view {
+            font-family: 'Consolas', 'Courier New', monospace;
+            white-space: pre-wrap;
+            padding: 1rem;
+            background-color: #2d2d2d;
+            border-radius: 4px;
+            overflow: auto;
+        }
+        
+        .diff-view .added {
+            background-color: rgba(0, 128, 0, 0.2);
+            color: #4caf50;
+        }
+        
+        .diff-view .removed {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #f44336;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid var(--primary-color);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><span>GPT</span>-Refactor</div>
+        <div>
+            <button class="secondary" onclick="window.open('https://github.com/SirCodeKnight/gpt-refactor', '_blank')">GitHub</button>
+            <button class="secondary">Docs</button>
+        </div>
+    </header>
+    
+    <main>
+        <div class="card">
+            <div class="settings-panel">
+                <h2>Refactoring Settings</h2>
+                <div>
+                    <select id="language-select">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                    <button id="refactor-btn">Refactor Code</button>
+                    <button id="reset-btn" class="secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="editor-container">
+            <div class="card code-editor">
+                <h3>Source Code</h3>
+                <textarea id="code-editor" placeholder="Enter your code here...">def fibonacci(n):
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+
+def main():
+    # Print first 10 Fibonacci numbers
+    for i in range(10):
+        print(f"Fibonacci {i}: {fibonacci(i)}")
+
+if __name__ == "__main__":
+    main()
+</textarea>
+            </div>
+        </div>
+        
+        <div id="results-container" class="hidden">
+            <div class="card">
+                <h3>Refactoring Results</h3>
+                <div class="tabs">
+                    <div class="tab active" data-tab="refactored">Refactored Code</div>
+                    <div class="tab" data-tab="diff">Diff</div>
+                    <div class="tab" data-tab="suggestions">Suggestions</div>
+                </div>
+                
+                <div id="refactored-code" class="tab-content">
+                    <textarea id="refactored-editor" readonly></textarea>
+                    <div style="margin-top: 1rem;">
+                        <button id="apply-btn">Apply Changes</button>
+                        <button id="back-btn" class="secondary">Back to Editor</button>
+                    </div>
+                </div>
+                
+                <div id="diff-view" class="tab-content hidden">
+                    <div class="diff-view" id="diff-content"></div>
+                </div>
+                
+                <div id="suggestions-view" class="tab-content hidden">
+                    <ul class="suggestions-list" id="suggestions-list"></ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <h3>Working AI Magic...</h3>
+            <p>GPT-Refactor is analyzing your code and applying best practices.</p>
+        </div>
+    </main>
+    
+    <footer>
+        Created by <a href="https://github.com/raayanTamuly" style="color: var(--primary-color);">raayanTamuly</a> © 2025
+    </footer>
+    
+    <script>
+        // Demo code - in a real app, this would connect to the API
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeEditor = document.getElementById('code-editor');
+            const refactoredEditor = document.getElementById('refactored-editor');
+            const diffContent = document.getElementById('diff-content');
+            const suggestionsList = document.getElementById('suggestions-list');
+            const languageSelect = document.getElementById('language-select');
+            
+            const editorContainer = document.getElementById('editor-container');
+            const resultsContainer = document.getElementById('results-container');
+            const loadingOverlay = document.getElementById('loading');
+            
+            const refactorBtn = document.getElementById('refactor-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const applyBtn = document.getElementById('apply-btn');
+            const backBtn = document.getElementById('back-btn');
+            
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            let originalCode = '';
+            let refactoredCode = '';
+            
+            // Tab handling
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Deactivate all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.add('hidden'));
+                    
+                    // Activate clicked tab
+                    tab.classList.add('active');
+                    const targetId = tab.getAttribute('data-tab');
+                    const targetContent = document.getElementById(targetId + '-view') || 
+                                        document.getElementById(targetId + '-code');
+                    targetContent.classList.remove('hidden');
+                });
+            });
+            
+            // Refactor button
+            refactorBtn.addEventListener('click', async () => {
+                const code = codeEditor.value;
+                if (!code.trim()) {
+                    alert('Please enter some code to refactor');
+                    return;
+                }
+                
+                originalCode = code;
+                const language = languageSelect.value;
+                
+                // Show loading
+                loadingOverlay.classList.remove('hidden');
+                
+                try {
+                    // In the demo, we'll simulate API call with a timeout
+                    setTimeout(async () => {
+                        try {
+                            // Make the actual API call
+                            const response = await fetch('/api/refactor', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    code,
+                                    language,
+                                    suggestions_only: false
+                                }),
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                displayResults(result);
+                            } else {
+                                alert('Error: ' + (result.error || 'Unknown error'));
+                            }
+                        } catch (error) {
+                            // Fallback to mock data if API call fails
+                            const mockResult = getMockResult(code, language);
+                            displayResults(mockResult);
+                        } finally {
+                            loadingOverlay.classList.add('hidden');
+                        }
+                    }, 2000); // Simulate 2s loading time
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    loadingOverlay.classList.add('hidden');
+                    alert('An error occurred');
+                }
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', () => {
+                codeEditor.value = '';
+                editorContainer.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+            });
+            
+            // Apply changes button
+            applyBtn.addEventListener('click', () => {
+                codeEditor.value = refactoredCode;
+                editorContainer.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+            });
+            
+            // Back button
+            backBtn.addEventListener('click', () => {
+                editorContainer.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+            });
+            
+            // Function to display results
+            function displayResults(result) {
+                refactoredCode = result.refactored_code;
+                
+                // Populate refactored code
+                refactoredEditor.value = refactoredCode;
+                
+                // Populate diff view
+                const formattedDiff = formatDiff(result.diff);
+                diffContent.innerHTML = formattedDiff;
+                
+                // Populate suggestions
+                suggestionsList.innerHTML = '';
+                if (result.suggestions && result.suggestions.length > 0) {
+                    result.suggestions.forEach((suggestion, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>Suggestion ${index + 1}:</strong> ${suggestion.text}`;
+                        suggestionsList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'No suggestions available';
+                    suggestionsList.appendChild(li);
+                }
+                
+                // Show results container, hide editor
+                editorContainer.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+                
+                // Reset to first tab
+                tabs[0].click();
+            }
+            
+            // Format diff for display
+            function formatDiff(diff) {
+                if (!diff) return '';
+                
+                const lines = diff.split('\n');
+                let formatted = '';
+                
+                lines.forEach(line => {
+                    if (line.startsWith('+')) {
+                        formatted += `<div class="added">${line}</div>`;
+                    } else if (line.startsWith('-')) {
+                        formatted += `<div class="removed">${line}</div>`;
+                    } else if (line.startsWith('@@')) {
+                        formatted += `<div style="color: #2196f3">${line}</div>`;
+                    } else {
+                        formatted += `<div>${line}</div>`;
+                    }
+                });
+                
+                return formatted;
+            }
+            
+            // Mock results for demo purposes
+            function getMockResult(code, language) {
+                if (language === 'python') {
+                    return {
+                        success: true,
+                        original_code: code,
+                        refactored_code: `def fibonacci(n: int) -> int:
+    """
+    Calculate the Fibonacci number at position n using recursion.
+    
+    Args:
+        n: The position in the Fibonacci sequence (0-indexed)
+        
+    Returns:
+        The Fibonacci number at position n
+    """
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+
+def main() -> None:
+    """Print the first 10 Fibonacci numbers."""
+    # Print first 10 Fibonacci numbers
+    for i in range(10):
+        print(f"Fibonacci {i}: {fibonacci(i)}")
+
+if __name__ == "__main__":
+    main()`,
+                        suggestions: [
+                            {text: 'Added type hints to improve code readability and enable better IDE support'},
+                            {text: 'Added comprehensive docstrings to explain function purpose and parameters'},
+                            {text: 'Added return type annotations to make the code more maintainable'},
+                            {text: 'Consider implementing a more efficient algorithm using memoization to avoid redundant calculations'}
+                        ],
+                        diff: `@@ -1,11 +1,22 @@
+-def fibonacci(n):
++def fibonacci(n: int) -> int:
++    """
++    Calculate the Fibonacci number at position n using recursion.
++    
++    Args:
++        n: The position in the Fibonacci sequence (0-indexed)
++        
++    Returns:
++        The Fibonacci number at position n
++    """
+     if n <= 0:
+         return 0
+     elif n == 1:
+         return 1
+     else:
+         return fibonacci(n-1) + fibonacci(n-2)
+ 
+-def main():
++def main() -> None:
++    """Print the first 10 Fibonacci numbers."""
+     # Print first 10 Fibonacci numbers
+     for i in range(10):
+         print(f"Fibonacci {i}: {fibonacci(i)}")`,
+                        language: 'python'
+                    };
+                } else if (language === 'javascript') {
+                    return {
+                        success: true,
+                        original_code: code,
+                        refactored_code: `/**
+ * Calculate the Fibonacci number at position n using recursion.
+ * @param {number} n - The position in the Fibonacci sequence (0-indexed)
+ * @returns {number} The Fibonacci number at position n
+ */
+const fibonacci = (n) => {
+  if (n <= 0) return 0;
+  if (n === 1) return 1;
+  return fibonacci(n-1) + fibonacci(n-2);
+};
+
+/**
+ * Print the first 10 Fibonacci numbers.
+ */
+const main = () => {
+  // Print first 10 Fibonacci numbers
+  for (let i = 0; i < 10; i++) {
+    console.log(\`Fibonacci \${i}: \${fibonacci(i)}\`);
+  }
+};
+
+// Execute main function
+main();`,
+                        suggestions: [
+                            {text: 'Converted to arrow functions for more concise syntax'},
+                            {text: 'Added JSDoc comments for better documentation'},
+                            {text: 'Used const for function declarations as they won\'t be reassigned'},
+                            {text: 'Simplified conditional checks in fibonacci function'}
+                        ],
+                        diff: `@@ -1,11 +1,22 @@
+-function fibonacci(n) {
+-    if (n <= 0) {
+-        return 0;
+-    } else if (n == 1) {
+-        return 1;
+-    } else {
+-        return fibonacci(n-1) + fibonacci(n-2);
+-    }
+-}
++/**
++ * Calculate the Fibonacci number at position n using recursion.
++ * @param {number} n - The position in the Fibonacci sequence (0-indexed)
++ * @returns {number} The Fibonacci number at position n
++ */
++const fibonacci = (n) => {
++  if (n <= 0) return 0;
++  if (n === 1) return 1;
++  return fibonacci(n-1) + fibonacci(n-2);
++};
+ 
+-function main() {
++/**
++ * Print the first 10 Fibonacci numbers.
++ */
++const main = () => {
+   // Print first 10 Fibonacci numbers
+-    for (var i = 0; i < 10; i++) {
+-        console.log("Fibonacci " + i + ": " + fibonacci(i));
+-    }
+-}`,
++  for (let i = 0; i < 10; i++) {
++    console.log(\`Fibonacci \${i}: \${fibonacci(i)}\`);
++  }
++};
++
++// Execute main function
++main();`,
+                        language: 'javascript'
+                    };
+                } else {
+                    // Generic mock result for other languages
+                    return {
+                        success: true,
+                        original_code: code,
+                        refactored_code: code + "\n// Code has been refactored with best practices\n",
+                        suggestions: [
+                            {text: 'Consider adding documentation to explain the code\'s purpose'},
+                            {text: 'Follow language-specific styling conventions'}
+                        ],
+                        diff: '@@ -1,1 +1,2 @@\n ' + code.replace('\n', '\n ') + '\n+// Code has been refactored with best practices',
+                        language: language
+                    };
+                }
+            }
+        });
+    </script>
+</body>
+</html>

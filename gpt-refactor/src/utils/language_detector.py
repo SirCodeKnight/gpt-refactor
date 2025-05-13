@@ -1,0 +1,71 @@
+ler": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "0ced0414-b600-49af-9308-df018f4c1401",
+    "Platform": "Command Act X",
+    "Category": "Functional",
+    "Cookie / Data Key name": "tc_sample_",
+    "Domain": "",
+    "Description": "Used for visitor and session sampling in the TMSCommander rules.",
+    "Retention period": "Session",
+    "Data Controller": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "6265ce8b-2dab-47d0-aa20-6f5a9191ba36",
+    "Platform": "Command Act X",
+    "Category": "Marketing",
+    "Cookie / Data Key name": "TMS",
+    "Domain": ".commander1.com​",
+    "Description": "Used when the deduplication is based on CAMPAIGN tracking (so the CAMPAIGN tracking is taken into account and not the landing page tracking)",
+    "Retention period": "Session",
+    "Data Controller": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "36ec783a-fb89-4ceb-9e02-2a1341dd7708",
+    "Platform": "Command Act X",
+    "Category": "Functional",
+    "Cookie / Data Key name": "TC_CHECK_COOKIES_SUPPORT",
+    "Domain": "",
+    "Description": "Technical cookie, TMS verification of Cookies deposit (exempted)",
+    "Retention period": "Session",
+    "Data Controller": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "deb22580-8984-4b44-a457-a1298081b143",
+    "Platform": "Command Act X",
+    "Category": "Marketing",
+    "Cookie / Data Key name": "TCSESSION",
+    "Domain": ".commander1.com",
+    "Description": "Used to calculate CAMPAIGN metrics based on the session.",
+    "Retention period": "Session",
+    "Data Controller": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "9633369d-8bb2-40c0-9edd-796bd19c1e66",
+    "Platform": "Command Act X",
+    "Category": "Marketing",
+    "Cookie / Data Key name": "TCREDIRECT",
+    "Domain": ".commander1.com",
+    "Description": "Used to deduplicate clicks (if redirect, just store the page view and ignore the click).",
+    "Retention period": "Session",
+    "Data Controller": "Command Act X",
+    "User Privacy & GDPR Rights Portals": "https://www.commandersact.com/en/privacy-policy/",
+    "Wildcard match": 0
+  },
+  {
+    "ID": "e7391647-deef-4047-9142-a73b2deca4f5",
+    "Platform": "Command Act X",
+    "Category": "Marketing",
+    "Cookie / Data Key name": "TCLANDINGURL",
+    "Domain": ".commander1.com",
+    "Descriptio

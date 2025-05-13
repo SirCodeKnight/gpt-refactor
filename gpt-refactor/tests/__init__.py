@@ -1,0 +1,1 @@
+"https://api.snapcraft.io/api/v1/sna
