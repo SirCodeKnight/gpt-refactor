@@ -1,8 +1,9 @@
-# GPT-Refactor: AI-Powered Code Refactoring Tool
+![banner](https://github.com/user-attachments/assets/6756bf7b-90c2-4eba-b0f5-9070909bfc3b) GPT-Refactor: AI-Powered Code Refactoring Tool
 
 GPT-Refactor is a professional-grade tool that uses AI to clean, optimize, and modernize your code across Python, JavaScript, C++, and Java codebases.
 
-![GPT-Refactor Banner](assets/banner.png)
+
+
 
 [![GitHub stars](https://img.shields.io/github/stars/SirCodeKnight/gpt-refactor.svg)](https://github.com/SirCodeKnight/gpt-refactor/stargazers)
 [![GitHub license](https://img.shields.io/github/license/SirCodeKnight/gpt-refactor.svg)](https://github.com/SirCodeKnight/gpt-refactor/blob/main/LICENSE)
